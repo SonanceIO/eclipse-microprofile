@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.sonance.dev.io</groupId>
     <artifactId>eclipse-microprofile</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <app.name>library</app.name>
+        <package.name>${app.name}-service</package.name>
+        <packaging.type>war</packaging.type>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.eclipse.microprofile</groupId>
@@ -23,5 +29,50 @@
         </dependency>
     </dependencies>
 
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.openliberty.tools</groupId>
+                <artifactId>liberty-maven-plugin</artifactId>
+                <version>3.10.3</version>
+                <configuration>
+                    <assemblyArtifact>
+                        <groupId>io.openliberty</groupId>
+                        <artifactId>openliberty-runtime</artifactId>
+                        <version>23.0.0.5</version>
+                        <type>zip</type>
+                    </assemblyArtifact>
+                    <serverXmlFile>${basedir}/src/main/liberty/config/server.xml</serverXmlFile>
+                    <packageName>${package.name}</packageName>
+                    <include>${packaging.type}</include>
+                    <looseApplication>false</looseApplication>
+                    <installAppPackages>project</installAppPackages>
+                    <bootstrapProperties>
+                        <app.context.root>/</app.context.root>
+                        <app.location>${project.artifactId}-${project.version}.war</app.location>
+                        <default.http.port>9080</default.http.port>
+                        <default.https.port>9443</default.https.port>
+                    </bootstrapProperties>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-server</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>install-server</goal>
+                            <goal>create</goal>
+                            <goal>install-feature</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>package-server-with-apps</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
